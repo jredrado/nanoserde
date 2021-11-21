@@ -1,3 +1,6 @@
+#![no_std]
+#![no_main]
+
 //! # nanoserde
 
 //! [![Github Actions](https://github.com/not-fl3/nanoserde/workflows/Cross-compile/badge.svg)](https://github.com/not-fl3/nanoserde/actions?query=workflow%3A)
@@ -19,6 +22,9 @@
 
 pub use nanoserde_derive::*;
 
+extern crate alloc;
+
+
 mod serde_bin;
 pub use crate::serde_bin::*;
 
@@ -28,5 +34,7 @@ pub use crate::serde_ron::*;
 mod serde_json;
 pub use crate::serde_json::*;
 
+
 mod toml;
 pub use crate::toml::*;
+

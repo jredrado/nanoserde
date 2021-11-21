@@ -6,7 +6,7 @@
 
 use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
 
-use std::iter::Peekable;
+use core::iter::Peekable;
 
 #[derive(Debug)]
 pub struct Attribute {
