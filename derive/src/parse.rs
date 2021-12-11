@@ -44,6 +44,7 @@ pub struct Struct {
     pub named: bool,
     pub fields: Vec<Field>,
     pub attributes: Vec<Attribute>,
+    pub generics: String,
 }
 
 #[derive(Debug)]
@@ -354,6 +355,7 @@ fn next_struct(mut source: &mut Peekable<impl Iterator<Item = TokenTree>>) -> St
             fields: vec![],
             attributes: vec![],
             named: false,
+            generics: String::from("")
         };
     };
     let group = group.unwrap();
@@ -377,6 +379,7 @@ fn next_struct(mut source: &mut Peekable<impl Iterator<Item = TokenTree>>) -> St
         named,
         fields,
         attributes: vec![],
+        generics: String::from("")
     }
 }
 
@@ -465,6 +468,7 @@ pub fn parse_data(input: TokenStream) -> Data {
             struct_.attributes = attributes;
 
             res = Data::Struct(struct_);
+
         }
         "enum" => {
             let enum_ = next_enum(&mut source);
@@ -473,6 +477,7 @@ pub fn parse_data(input: TokenStream) -> Data {
         "union" => unimplemented!("Unions are not supported"),
         unexpected => panic!("Unexpected keyword: {}", unexpected),
     }
+
 
     assert!(
         source.next().is_none(),
