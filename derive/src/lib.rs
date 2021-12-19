@@ -1,4 +1,5 @@
 extern crate proc_macro;
+extern crate alloc;
 
 #[macro_use]
 mod shared;
@@ -144,8 +145,19 @@ fn extract_option_segment(path: &Path) -> Option<&PathSegment> {
         .and_then(|_| path.segments.last())
 }
 
+use structmeta::{StructMeta,NameValue};
+use alloc::collections::BTreeMap;
+
+#[derive(StructMeta, Debug)]
+struct NSerde {
+    pub skip: bool,
+    pub rename: Option<LitStr>,
+}
+
 #[proc_macro_derive(SerJson, attributes(nserde))]
 pub fn derive_ser_json(input: TokenStream) -> TokenStream {
+
+    
 
     let input = parse_macro_input!(input as DeriveInput);
 
@@ -155,9 +167,20 @@ pub fn derive_ser_json(input: TokenStream) -> TokenStream {
     };
     let field_name = fields.iter().map(|field| &field.ident );
     let field_name_string = fields.iter().map(|field| { 
-            let paths = field.attrs.iter().map( |a| format!("{:?}",a.path) );
             format_ident!("{}",&field.ident.as_ref().unwrap()).to_string() 
     });
+
+    let nserde_args : BTreeMap<String,Vec<NSerde>> = fields.iter().map(|field| { 
+        let attrs : Vec<NSerde> = field.attrs.iter().map(move |attr| {
+                let nserde_attrs : Result<NSerde> = attr.parse_args();
+                nserde_attrs
+        }).filter_map( |n| n.ok() ).collect();
+
+        (format_ident!("{}",&field.ident.as_ref().unwrap()).to_string() , attrs )
+
+    }).collect();
+
+
     let field_type_is_option = fields.iter().map(|field|  extract_type_path(&field.ty).and_then(|path| extract_option_segment(path))).map(|o| o.is_some());
 
     let struct_name = &input.ident;
@@ -171,22 +194,36 @@ pub fn derive_ser_json(input: TokenStream) -> TokenStream {
 
     for ((fname, fname_string), ftype_is_option) in field_name.into_iter().zip(field_name_string).zip(field_type_is_option) {
 
-        if ftype_is_option {
-            s_code.push_str(&format!("\nif self.{}.is_some(){{",fname_string));
+        if let Some(n_args) = nserde_args.get(&fname_string) {
+            let skip = n_args.iter().any(|a| a.skip );
+            
+            if !skip {
+                let rename = n_args.iter().filter_map ( |a| a.rename.as_ref() ).next(); //Option<&LitStr>
 
-            s_code.push_str( &format!( "\nif first_field_was_serialized {{ s.conl(); }};
-                first_field_was_serialized = true;
-                s.field(d+1, \"{}\");
-                self.{}.ser_json(d+1, s);",fname_string,fname_string
-                ));
-            s_code.push_str("}");
+                let mut field_name = fname_string.clone();
 
-        }else {
-            s_code.push_str( &format!( "\nif first_field_was_serialized {{ s.conl(); }};
-                first_field_was_serialized = true;
-                s.field(d+1, \"{}\");
-                self.{}.ser_json(d+1, s);",fname_string,fname_string
-            ));
+                if let Some(fname) = rename {
+                        field_name = fname.value();
+                } 
+
+                if ftype_is_option {
+                    s_code.push_str(&format!("\nif self.{}.is_some(){{",fname_string));
+
+                    s_code.push_str( &format!( "\nif first_field_was_serialized {{ s.conl(); }};
+                        first_field_was_serialized = true;
+                        s.field(d+1, \"{}\");
+                        self.{}.ser_json(d+1, s);",field_name,fname_string
+                        ));
+                    s_code.push_str("}");
+
+                }else {
+                    s_code.push_str( &format!( "\nif first_field_was_serialized {{ s.conl(); }};
+                        first_field_was_serialized = true;
+                        s.field(d+1, \"{}\");
+                        self.{}.ser_json(d+1, s);",field_name,fname_string
+                    ));
+                }
+            }
         }
         
     }

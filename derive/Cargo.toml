@@ -15,3 +15,4 @@ proc-macro = true
 syn = { version="1.0.44" , features = ["full","extra-traits"] } 
 quote = "1.0"
 proc-macro2 = {version = "1.0"}
+structmeta = "0.1.4"
