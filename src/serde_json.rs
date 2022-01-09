@@ -1,4 +1,6 @@
 use alloc::collections::BTreeMap as HashMap;
+use alloc::collections::BTreeSet as HashSet;
+
 use core::hash::Hash;
 use core::str::Chars;
 
@@ -1098,5 +1100,25 @@ where
 {
     fn ser_json(&self, d: usize, s: &mut SerJsonState) {
         self.borrow().ser_json(d, s)
+    }
+}
+
+impl<T> SerJson for HashSet<T>
+where
+    T: SerJson,
+{
+    fn ser_json(&self, d: usize, s: &mut SerJsonState) {
+        s.out.push('[');
+        if self.len() > 0 {
+            let last = self.len() - 1;
+            for (index, item) in self.iter().enumerate() {
+                s.indent(d + 1);
+                item.ser_json(d + 1, s);
+                if index != last {
+                    s.out.push(',');
+                }
+            }
+        }
+        s.out.push(']');
     }
 }
