@@ -16,6 +16,7 @@ mod parse;
 
 use crate::serde_json::*;
 
+
 #[proc_macro_derive(SerBin, attributes(nserde))]
 pub fn derive_ser_bin(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse::parse_data(input);
@@ -94,24 +95,43 @@ pub fn derive_de_ron(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 }
 
 
-#[proc_macro_derive(SerJson, attributes(nserde))]
+
+#[proc_macro_derive(ToJSON, attributes(nserde))]
 pub fn derive_ser_json(input_ts: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
-    let input = parse::parse_data(input_ts.clone());
+    /*let input = parse::parse_data(input_ts.clone());
 
     if let Some(proxy) = shared::attrs_proxy(&input.attributes()) {
         return derive_ser_json_proxy(&proxy, &input.name());
     }
+    */
 
-    // ok we have an ident, its either a struct or a enum
-    let ts = match &input {
-        parse::Data::Struct(struct_) if struct_.named => derive_ser_json_struct(input_ts),
-        parse::Data::Struct(struct_) => derive_ser_json_struct_unnamed(struct_),
-        parse::Data::Enum(enum_) => derive_ser_json_enum(enum_),
+    let new_input_ts = input_ts.clone();
+
+    let input = syn::parse_macro_input!(input_ts as syn::DeriveInput);
+
+    match &input.data {
+        syn::Data::Struct(_) => derive_ser_json_struct(new_input_ts),
+        /*
+        syn::Data::Struct(struct_) => { 
+                                    if let parse::Data::Struct(struct_) = parse::parse_data(input_ts) {
+                                            derive_ser_json_struct_unnamed(&struct_)
+                                    }else {
+                                        proc_macro::TokenStream::new()
+                                    }
+                                },
+        */
+        syn::Data::Enum(enum_) => {
+                                if let parse::Data::Enum(enum_) = parse::parse_data(new_input_ts) {
+                                    derive_ser_json_enum(&enum_)
+                                } else {
+                                    proc_macro::TokenStream::new()
+                                }
+                                
+                            }
         _ => unimplemented!(""),
-    };
+    }
 
-    ts
 }
 
 

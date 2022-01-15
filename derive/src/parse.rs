@@ -486,3 +486,4 @@ pub fn parse_data(input: TokenStream) -> Data {
 
     res
 }
+

@@ -137,9 +137,9 @@ pub fn derive_ser_json_struct(input: TokenStream) -> TokenStream {
     let s_where_clause = (quote!{#where_clause}).to_string();
 
 
-    s_code  = format!("impl {} authcomp::ToJSON for {} {} {} {{
+    s_code  = format!("impl {} nanoserde::SerJson for {} {} {} {{
             
-        fn ser_json (&self, d: usize, s: &mut authcomp::JSONState) {{
+        fn ser_json (&self, d: usize, s: &mut nanoserde::SerJsonState) {{
 
             let mut first_field_was_serialized  = false;
 
