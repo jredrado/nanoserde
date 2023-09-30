@@ -1,5 +1,5 @@
-#![no_std]
-#![no_main]
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(not(feature = "std"), no_main)]
 
 //! # nanoserde
 
@@ -22,6 +22,7 @@
 
 pub use nanoserde_derive::*;
 
+#![cfg_attr(not(feature = "std"), no_std)]
 extern crate alloc;
 
 
