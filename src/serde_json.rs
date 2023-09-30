@@ -1129,3 +1129,9 @@ impl SerJson for core::num::NonZeroUsize {
         s.out.push_str(&self.get().to_string());
     }
 }
+
+impl SerJson for std::num::NonZeroUsize {
+    fn ser_json(&self, d: usize, s: &mut SerJsonState) {
+        s.out.push_str(&self.get().to_string());
+    }
+}
