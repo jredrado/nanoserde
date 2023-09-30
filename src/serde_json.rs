@@ -1123,8 +1123,15 @@ where
     }
 }
 
-
+#[cfg(not(feature = "std"))]
 impl SerJson for core::num::NonZeroUsize {
+    fn ser_json(&self, d: usize, s: &mut SerJsonState) {
+        s.out.push_str(&self.get().to_string());
+    }
+}
+
+#[cfg(feature = "std")]
+impl SerJson for std::num::NonZeroUsize {
     fn ser_json(&self, d: usize, s: &mut SerJsonState) {
         s.out.push_str(&self.get().to_string());
     }
