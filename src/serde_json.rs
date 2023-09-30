@@ -1,4 +1,10 @@
+#[cfg(feature = "std")]
+use std::collections::{HashMap, HashSet};
+
+#[cfg(not(feature = "std"))]
 use alloc::collections::BTreeMap as HashMap;
+
+#[cfg(not(feature = "std"))]
 use alloc::collections::BTreeSet as HashSet;
 
 use core::hash::Hash;
