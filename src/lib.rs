@@ -22,7 +22,6 @@
 
 pub use nanoserde_derive::*;
 
-#[cfg(not(feature = "std")]
 extern crate alloc;
 
 
