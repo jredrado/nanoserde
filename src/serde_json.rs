@@ -10,11 +10,27 @@ use alloc::collections::BTreeSet as HashSet;
 use core::hash::Hash;
 use core::str::Chars;
 
+#[cfg(not(feature = "std"))]
 use alloc::string::String;
+#[cfg(not(feature = "std"))]
 use alloc::string::ToString;
+#[cfg(not(feature = "std"))]
 use alloc::format;
+#[cfg(not(feature = "std"))]
 use alloc::boxed::Box;
+#[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+
+#[cfg(feature = "std")]
+use std::string::String;
+#[cfg(feature = "std")]
+use std::string::ToString;
+#[cfg(feature = "std")]
+use std::format;
+#[cfg(feature = "std")]
+use std::boxed::Box;
+#[cfg(feature = "std")]
+use std::vec::Vec;
 
 /// The internal state of a JSON serialization.
 pub struct SerJsonState {
