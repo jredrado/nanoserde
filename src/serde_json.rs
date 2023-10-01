@@ -1,5 +1,5 @@
 #[cfg(feature = "std")]
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap as HashMap, BTreeSet as HashSet};
 
 #[cfg(not(feature = "std"))]
 use alloc::collections::BTreeMap as HashMap;
